@@ -42,7 +42,7 @@ class IjkPlayerValue {
     @required this.duration,
     this.size,
     this.position = const Duration(),
-    this.buffered = const <DurationRange>[],
+    this.buffered = const Duration(),
     this.isPlaying = false,
     this.isLooping = false,
     this.isBuffering = false,
@@ -64,7 +64,7 @@ class IjkPlayerValue {
   final Duration position;
 
   /// The currently buffered ranges.
-  final List<DurationRange> buffered;
+  final Duration buffered;
 
   /// True if the video is playing. False if it's paused.
   final bool isPlaying;
@@ -96,7 +96,7 @@ class IjkPlayerValue {
     Duration duration,
     Size size,
     Duration position,
-    List<DurationRange> buffered,
+    Duration buffered,
     bool isPlaying,
     bool isLooping,
     bool isBuffering,
@@ -122,7 +122,7 @@ class IjkPlayerValue {
         'duration: $duration, '
         'size: $size, '
         'position: $position, '
-        'buffered: [${buffered.join(', ')}], '
+        'buffered: $buffered, '
         'isPlaying: $isPlaying, '
         'isLooping: $isLooping, '
         'isBuffering: $isBuffering'
@@ -246,10 +246,7 @@ class IjkPlayerController extends ValueNotifier<IjkPlayerValue> {
           _timer?.cancel();
           break;
         case 'bufferingUpdate':
-          final List<dynamic> values = map['values'];
-          value = value.copyWith(
-            buffered: values.map<DurationRange>(toDurationRange).toList(),
-          );
+          value = value.copyWith(buffered: Duration(milliseconds: map['values']));
           break;
         case 'bufferingStart':
           value = value.copyWith(isBuffering: true);
@@ -637,20 +634,15 @@ class _VideoProgressIndicatorState extends State<VideoProgressIndicator> {
     if (controller.value.initialized) {
       final int duration = controller.value.duration.inMilliseconds;
       final int position = controller.value.position.inMilliseconds;
+      final int buffered = controller.value.buffered.inMilliseconds;
 
       int maxBuffering = 0;
-      for (DurationRange range in controller.value.buffered) {
-        final int end = range.end.inMilliseconds;
-        if (end > maxBuffering) {
-          maxBuffering = end;
-        }
-      }
 
       progressIndicator = Stack(
         fit: StackFit.passthrough,
         children: <Widget>[
           LinearProgressIndicator(
-            value: maxBuffering / duration,
+            value: buffered / duration,
             valueColor: AlwaysStoppedAnimation<Color>(colors.bufferedColor),
             backgroundColor: colors.backgroundColor,
           ),

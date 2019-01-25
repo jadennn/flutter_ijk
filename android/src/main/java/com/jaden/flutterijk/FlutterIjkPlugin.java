@@ -55,19 +55,21 @@ public class FlutterIjkPlugin implements MethodCallHandler {
       this.textureEntry = textureEntry;
 
       ijkPlayer = new IjkMediaPlayer();
+      //软解
+      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "videotoolbox", 0);
       //使用tcp传输
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_transport", "tcp");
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_flags", "prefer_tcp");
       //加快rtsp的一些配置参数
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "allowed_media_types", "video");
-      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 20000);
-      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "buffer_size", 1316);
+      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 10*1000*1000);
+      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "max-buffer-size", 1024);
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", 100L);
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", 10240L);
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "flush_packets", 1L);
       ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0L);
-      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L);
+      ijkPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 60L);
 
       try {
         if(dataSource != null && dataSource.startsWith("assets:///")){
@@ -78,7 +80,7 @@ public class FlutterIjkPlugin implements MethodCallHandler {
         } else {
           ijkPlayer.setDataSource(dataSource);
         }
-        ijkPlayer.prepareAsync();
+
       }catch (IOException e){
         e.printStackTrace();
       }catch (IllegalArgumentException e){
@@ -124,9 +126,8 @@ public class FlutterIjkPlugin implements MethodCallHandler {
         public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int i) {
           Map<String, Object> event = new HashMap<>();
           event.put("event", "bufferingUpdate");
-          List<Integer> range = Arrays.asList(0, i);
-          // iOS supports a list of buffered ranges, so here is a list with a single range.
-          event.put("values", Collections.singletonList(range));
+          //percent to time
+          event.put("values", i*ijkPlayer.getDuration()/100);
           eventSink.success(event);
         }
       });
@@ -139,6 +140,8 @@ public class FlutterIjkPlugin implements MethodCallHandler {
           return true;
         }
       });
+
+      ijkPlayer.prepareAsync();
 
       Map<String, Object> reply = new HashMap<>();
       reply.put("textureId", textureEntry.id());
