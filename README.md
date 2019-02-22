@@ -2,9 +2,6 @@
 
 A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
 
-![](https://github.com/jadennn/flutter_ijk/blob/master/publish.png)
-
-## Getting Started
 
 由于最近比较忙，没空维护该项目，但是GitHub上面有些同学在提issue，所以公开改项目的ijkplayer的源码，如果有大神能够解决bug的话，欢迎在GitHub或者CSDN私聊，将你拉入到项目中来进行flutter_ijk的开发维护。
 
@@ -49,6 +46,10 @@ A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
  
 
 再次感谢大家理解支持。
+
+![](https://github.com/jadennn/flutter_ijk/blob/master/publish.png)
+
+## Getting Started
 
 1 . add in pubspec.yaml
 
