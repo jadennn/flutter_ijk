@@ -18,5 +18,6 @@ A new Flutter plugin.
   s.vendored_frameworks = 'IJKMediaFramework.framework'
 
   s.ios.deployment_target = '8.0'
+  s.library = ['z', 'c++']
 end
 
