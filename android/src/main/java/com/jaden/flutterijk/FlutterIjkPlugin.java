@@ -140,6 +140,16 @@ public class FlutterIjkPlugin implements MethodCallHandler {
           return true;
         }
       });
+      ijkPlayer.setOnCompletionListener(new IMediaPlayer.OnCompletionListener() {
+        @Override
+        public void onCompletion(IMediaPlayer iMediaPlayer) {
+          Map<String, Object> event = new HashMap<>();
+          event.put("event", "completed");
+          if (eventSink != null) {
+            eventSink.success(event);
+          }
+        }
+      });
 
       ijkPlayer.prepareAsync();
 
