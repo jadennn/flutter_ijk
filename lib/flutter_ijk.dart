@@ -495,7 +495,7 @@ class _IjkPlayerState extends State<IjkPlayer> {
   @override
   void deactivate() {
     super.deactivate();
-    widget.controller.removeListener(_listener);
+    widget.controller?.removeListener(_listener);
   }
 
   @override
