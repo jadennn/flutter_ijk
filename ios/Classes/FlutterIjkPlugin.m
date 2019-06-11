@@ -2,17 +2,17 @@
 #import <IJKMediaFramework/IJKMediaFramework.h>
 #import <libkern/OSAtomic.h>
 
-int64_t FLTCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timescale; }
+int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timescale; }
 
-@interface FLTFrameUpdater : NSObject
+@interface FLTIJKFrameUpdater : NSObject
 @property(nonatomic) int64_t textureId;
 @property(nonatomic, readonly) NSObject<FlutterTextureRegistry>* registry;
 - (void)onDisplayLink:(CADisplayLink*)link;
 @end
 
 
-@implementation FLTFrameUpdater
-- (FLTFrameUpdater*)initWithRegistry:(NSObject<FlutterTextureRegistry>*)registry {
+@implementation FLTIJKFrameUpdater
+- (FLTIJKFrameUpdater*)initWithRegistry:(NSObject<FlutterTextureRegistry>*)registry {
     NSAssert(self, @"super init cannot be nil");
     if (self == nil) return nil;
     _registry = registry;
@@ -24,7 +24,7 @@ int64_t FLTCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timesca
 }
 @end
 
-@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler>
+@interface FLTIJKVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler>
 @property(readonly, nonatomic) id <IJKMediaPlayback> player;
 @property(readonly) CVPixelBufferRef volatile latestPixelBuffer;
 @property(readonly, nonatomic) CADisplayLink* displayLink;
@@ -34,20 +34,20 @@ int64_t FLTCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timesca
 @property(nonatomic, readonly) bool isPlaying;
 @property(nonatomic, readonly) bool isLooping;
 @property(nonatomic, readonly) bool isInitialized;
-- (instancetype)initWithURL:(NSURL*)url frameUpdater:(FLTFrameUpdater*)frameUpdater;
+- (instancetype)initWithURL:(NSURL*)url frameUpdater:(FLTIJKFrameUpdater*)frameUpdater;
 - (void)play;
 - (void)pause;
 - (void)setIsLooping:(bool)isLooping;
 - (void)updatePlayingState;
 @end
 
-@implementation FLTVideoPlayer
-- (instancetype)initWithAsset:(NSString*)asset frameUpdater:(FLTFrameUpdater*)frameUpdater {
+@implementation FLTIJKVideoPlayer
+- (instancetype)initWithAsset:(NSString*)asset frameUpdater:(FLTIJKFrameUpdater*)frameUpdater {
     NSString* path = [[NSBundle mainBundle] pathForResource:asset ofType:nil];
     return [self initWithURL:[NSURL fileURLWithPath:path] frameUpdater:frameUpdater];
 }
 
-- (instancetype)initWithURL:(NSURL*)url frameUpdater:(FLTFrameUpdater*)frameUpdater {
+- (instancetype)initWithURL:(NSURL*)url frameUpdater:(FLTIJKFrameUpdater*)frameUpdater {
     self = [super init];
     NSAssert(self, @"super init cannot be nil");
     _isInitialized = false;
@@ -346,9 +346,9 @@ int64_t FLTCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timesca
         result(nil);
     } else if ([@"create" isEqualToString:call.method]) {
         NSDictionary* argsMap = call.arguments;
-        FLTFrameUpdater* frameUpdater = [[FLTFrameUpdater alloc] initWithRegistry:_registry];
+        FLTIJKFrameUpdater* frameUpdater = [[FLTIJKFrameUpdater alloc] initWithRegistry:_registry];
         NSString* dataSource = argsMap[@"asset"];
-        FLTVideoPlayer* player;
+        FLTIJKVideoPlayer* player;
         if (dataSource) {
             NSString* assetPath;
             NSString* package = argsMap[@"package"];
@@ -357,10 +357,10 @@ int64_t FLTCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timesca
             } else {
                 assetPath = [_registrar lookupKeyForAsset:dataSource];
             }
-            player = [[FLTVideoPlayer alloc] initWithAsset:assetPath frameUpdater:frameUpdater];
+            player = [[FLTIJKVideoPlayer alloc] initWithAsset:assetPath frameUpdater:frameUpdater];
         } else {
             dataSource = argsMap[@"uri"];
-            player = [[FLTVideoPlayer alloc] initWithURL:[NSURL URLWithString:dataSource]
+            player = [[FLTIJKVideoPlayer alloc] initWithURL:[NSURL URLWithString:dataSource]
                                             frameUpdater:frameUpdater];
         }
         int64_t textureId = [_registry registerTexture:player];
@@ -376,7 +376,7 @@ int64_t FLTCMTimeToMillis(CMTime time) { return time.value * 1000 / time.timesca
     } else {
         NSDictionary* argsMap = call.arguments;
         int64_t textureId = ((NSNumber*)argsMap[@"textureId"]).unsignedIntegerValue;
-        FLTVideoPlayer* player = _players[@(textureId)];
+        FLTIJKVideoPlayer* player = _players[@(textureId)];
         if ([@"dispose" isEqualToString:call.method]) {
             [_registry unregisterTexture:textureId];
             [_players removeObjectForKey:@(textureId)];
