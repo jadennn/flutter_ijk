@@ -2,10 +2,7 @@
 
 A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
 
-
-由于最近比较忙，没空维护该项目，但是GitHub上面有些同学在提issue，所以公开改项目的ijkplayer的源码，如果有大神能够解决bug的话，欢迎在GitHub或者CSDN私聊，将你拉入到项目中来进行flutter_ijk的开发维护。
-
-   参入开发步骤：
+  flutter_ijk 是flutter端的ijkplayer播放器，在IOS和Android native端都使用的是bilibili的ijkplayer，由于GitHub大小限制，本项目的ijkplayer源码放在百度网盘，已经定制过编译脚本和部分的功能代码，可以参考以下步骤来获取：
 
  1. ijkplayer的源码如下，支持ios和Android编译：
 
@@ -39,19 +36,13 @@ A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
 
     https://www.jianshu.com/p/3108c8a047ee
 
-4. 以上步骤是修改ijkplayer的bug，如果是flutter_ijk中的代码bug，直接修改即可
-
-5. 如果修改后本地测试通过，欢迎通过GitHub或者CSDN留言来申请代码提交权限
-
- 
-
-再次感谢大家理解支持。
+4. 以上步骤可以得到ijkplayer在Android端的so库和IOS的framework文件，dart层见本GitHub仓库。
 
 ![](https://github.com/jadennn/flutter_ijk/blob/master/publish.png)
 
-## Getting Started
+## 使用
 
-1 . add in pubspec.yaml
+1 . 在pubspec.yaml增加以下引用
 
 ```
   flutter_ijk:
@@ -60,11 +51,9 @@ A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
 
 ```
 
-2. how to use
+2. api参考的是video_player，使用方法相同
 
-API is refer to video_player
-
-example:
+例子:
 
 ```
 class VideoPageState extends State<VideoPage> {
@@ -98,8 +87,10 @@ class VideoPageState extends State<VideoPage> {
 }
 ```
 
-3. Reference 
+3. 参考文档
 
-[ijkplayer](https://github.com/bilibili/ijkplayer) 
-[video_player](https://github.com/flutter/plugins/tree/master/packages/video_player) 
-[camera](https://github.com/flutter/plugins/tree/master/packages/camera) 
+感谢以下项目：
+
+[ijkplayer](https://github.com/bilibili/ijkplayer)     
+[video_player](https://github.com/flutter/plugins/tree/master/packages/video_player)     
+[camera](https://github.com/flutter/plugins/tree/master/packages/camera)  
