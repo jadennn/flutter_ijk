@@ -2,41 +2,8 @@
 
 A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
 
-  flutter_ijk 是flutter端的ijkplayer播放器，在IOS和Android native端都使用的是bilibili的ijkplayer，由于GitHub大小限制，本项目的ijkplayer源码放在百度网盘，已经定制过编译脚本和部分的功能代码，可以参考以下步骤来获取：
-
- 1. ijkplayer的源码如下，支持ios和Android编译：
-
-     编译步骤请查看源码根目录的readme.txt
-
-     默认使用的是module-rtsp.sh，如果要增加配置，请修改此文件。
-
-     ijkplayer源代码：
-
-      https://pan.baidu.com/s/1EqGvGy8yvKbWCKgKPHLOaA
-
- 2. 对于Android ijk的编译，参考如下链接，请注意，使用上面的ijkplayer代码，不用再通过脚本重复下载ijkplayer了：
-
-     a.配置jdk，sdk，ndk环境
-
-     b.查看ijkplayer下的readme.txt，参考编译Android so库
-
-     c.拷贝修复bug后的编译完成的so库替换flutter_ijk Android目录下的so库，注意的是多平台支持
-
-     https://blog.csdn.net/coder_pig/article/details/79134625
-
-3. 对于IOS ijk的编译，参考如下链接，请注意，使用上面的ijkplayer代码，不用再通过脚本重复下载ijkplayer了：
-
-    a. 配置环境
-
-    b.查看ijkplayer下的readme.txt，编译ios代码
-
-    c.制作framework（需要注意的是我的IJKMediaPlayer里面有一些关于CVPixelBufferRef的定制，都加了//add for flutter的注释，这些修改不能去掉）
-
-    d.拷贝修复bug后的编译完成的IJKMediaFramework.framework替换flutter_ijk IOS目录下的IJKMediaFramework.framework库
-
-    https://www.jianshu.com/p/3108c8a047ee
-
-4. 以上步骤可以得到ijkplayer在Android端的so库和IOS的framework文件，dart层见本GitHub仓库。
+  flutter_ijk 是flutter端的ijkplayer播放器，在IOS和Android native端都使用的是bilibili的ijkplayer，由于GitHub大小限制，本项目的ijkplayer源码放在码云，已经定制过编译脚本和部分的功能代码，可以参考以下步骤来获取：
+https://gitee.com/jadennn/flutter_ijkplayer_source.git
 
 ![](https://github.com/jadennn/flutter_ijk/blob/master/publish.png)
 
@@ -94,3 +61,43 @@ class VideoPageState extends State<VideoPage> {
 [ijkplayer](https://github.com/bilibili/ijkplayer)     
 [video_player](https://github.com/flutter/plugins/tree/master/packages/video_player)     
 [camera](https://github.com/flutter/plugins/tree/master/packages/camera)  
+
+
+4. 如果出现类似下面的错误
+```
+ === BUILD TARGET Runner OF PROJECT Runner WITH CONFIGURATION Debug ===
+    ld: warning: ignoring file /Users/bkillian/repos/flutter_ijk/ios/IJKMediaFramework.framework/IJKMediaFramework,
+    file was built for unsupported file format ( 0x76 0x65 0x72 0x73 0x69 0x6F 0x6E 0x20 0x68 0x74 0x74 0x70 0x73
+    0x3A 0x2F 0x2F ) which is not the architecture being linked (x86_64):
+    /Users/bkillian/repos/flutter_ijk/ios/IJKMediaFramework.framework/IJKMediaFramework
+    Undefined symbols for architecture x86_64:
+      "_OBJC_CLASS_$_IJKFFOptions", referenced from:
+          objc-class-ref in libflutter_ijk.a(FlutterIjkPlugin.o)
+      "_IJKMPMoviePlayerPlaybackDidFinishNotification", referenced from:
+          -[FLTVideoPlayer installMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+          -[FLTVideoPlayer removeMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+      "_IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey", referenced from:
+          -[FLTVideoPlayer moviePlayBackFinish:] in libflutter_ijk.a(FlutterIjkPlugin.o)
+      "_OBJC_CLASS_$_IJKFFMoviePlayerController", referenced from:
+          objc-class-ref in libflutter_ijk.a(FlutterIjkPlugin.o)
+      "_IJKMPMoviePlayerLoadStateDidChangeNotification", referenced from:
+          -[FLTVideoPlayer installMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+          -[FLTVideoPlayer removeMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+      "_IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification", referenced from:
+          -[FLTVideoPlayer installMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+          -[FLTVideoPlayer removeMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+      "_IJKMPMoviePlayerPlaybackStateDidChangeNotification", referenced from:
+          -[FLTVideoPlayer installMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+          -[FLTVideoPlayer removeMovieNotificationObservers] in libflutter_ijk.a(FlutterIjkPlugin.o)
+    ld: symbol(s) not found for architecture x86_64
+    clang: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+ 这是因为IOS的framework太大，上传git的时候使用了git lfs功能，但是pod仓库在处理git lfs可能会有bug，导致文件缺失，为了解决这个问题，强烈建议将本仓库的代码下载到本地，直接在本地引用到项目中，引用方法：
+ 将本项目复制到你的项目的根目录的plugins下(如果没有，新建一个plugins)，在pubspec.yaml中新增
+ ```
+ flutter_ijk:
+   path:plugins/flutter_ijk
+ ```
+ 然后就可以正常引用了
+ 
+ 5. 强烈建议自己编译IJKPlayer，IJKPlayer的源代码已经经过了我的定制，只用配置好环境，IOS和Android共用同一个仓库，源代码和编译方法见：https://gitee.com/jadennn/flutter_ijkplayer_source.git
