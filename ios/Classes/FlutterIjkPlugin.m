@@ -25,8 +25,7 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
 @end
 
 @interface FLTIJKVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler>
-@property(readonly, nonatomic) id <IJKMediaPlayback> player;
-@property(readonly) CVPixelBufferRef volatile latestPixelBuffer;
+@property(readonly, strong) id<IJKMediaPlayback> player;
 @property(readonly, nonatomic) CADisplayLink* displayLink;
 @property(nonatomic) FlutterEventChannel* eventChannel;
 @property(nonatomic) FlutterEventSink eventSink;
@@ -55,7 +54,8 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
     _disposed = false;
     
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
-    [options setPlayerOptionIntValue:0 forKey:@"videotoolbox"]; //软解
+    [options setPlayerOptionIntValue:0 forKey:@"videotoolbox"]; //硬解
+    [options setPlayerOptionIntValue:0 forKey:@"mediacodec-hevc"]; //h265硬解
     [options setFormatOptionValue:@"tcp" forKey:@"rtsp_transport"];
     [options setFormatOptionValue:@"prefer_tcp" forKey:@"rtsp_flags"];
     [options setFormatOptionValue:@"video" forKey:@"allowed_media_types"];
@@ -72,7 +72,7 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
     
     [self removeMovieNotificationObservers];
     [self installMovieNotificationObservers];
-    
+
     if(![_player isPlaying]){
         [_player prepareToPlay];
     }
@@ -89,37 +89,37 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(loadStateDidChange:)
                                                  name:IJKMPMoviePlayerLoadStateDidChangeNotification
-                                               object:_player];
+                                               object:self.player];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(moviePlayBackFinish:)
                                                  name:IJKMPMoviePlayerPlaybackDidFinishNotification
-                                               object:_player];
+                                               object:self.player];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(mediaIsPreparedToPlayDidChange:)
                                                  name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
-                                               object:_player];
+                                               object:self.player];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(moviePlayBackStateDidChange:)
                                                  name:IJKMPMoviePlayerPlaybackStateDidChangeNotification
-                                               object:_player];
+                                               object:self.player];
     
 }
 
 - (void)removeMovieNotificationObservers {
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:IJKMPMoviePlayerLoadStateDidChangeNotification
-                                                  object:_player];
+                                                  object:self.player];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:IJKMPMoviePlayerPlaybackDidFinishNotification
-                                                  object:_player];
+                                                  object:self.player];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification
-                                                  object:_player];
+                                                  object:self.player];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:IJKMPMoviePlayerPlaybackStateDidChangeNotification
-                                                  object:_player];
+                                                  object:self.player];
     
 }
 
@@ -270,16 +270,11 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
 }
 
 - (CVPixelBufferRef)copyPixelBuffer {
-    CVPixelBufferRef newBuffer = [_player framePixelbuffer];
-    if(newBuffer){
-        CFRetain(newBuffer);
-        CVPixelBufferRef pixelBuffer = _latestPixelBuffer;
-        while (!OSAtomicCompareAndSwapPtrBarrier(pixelBuffer, newBuffer, (void **)&_latestPixelBuffer)) {
-            pixelBuffer = _latestPixelBuffer;
-        }
-        return pixelBuffer;
+    CVPixelBufferRef pixelBuffer = [_player framePixelbuffer];
+    if(pixelBuffer != nil){
+        CFRetain(pixelBuffer);
     }
-    return NULL;
+    return pixelBuffer;
 }
 
 - (FlutterError* _Nullable)onCancelWithArguments:(id _Nullable)arguments {
@@ -297,12 +292,13 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
 - (void)dispose {
     _disposed = true;
     [_displayLink invalidate];
-    [_player stop];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_eventChannel setStreamHandler:nil];
-    if (_latestPixelBuffer) {
-        CFRelease(_latestPixelBuffer);
+    [self removeMovieNotificationObservers];
+    if(_player != nil){
+        [_player stop];
+        [_player shutdown];
+        _player = nil;
     }
+    //[_eventChannel setStreamHandler:nil];
 }
 
 @end
@@ -337,7 +333,6 @@ int64_t FLTIJKCMTimeToMillis(CMTime time) { return time.value * 1000 / time.time
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     if ([@"init" isEqualToString:call.method]) {
         // Allow audio playback when the Ring/Silent switch is set to silent
-        
         for (NSNumber* textureId in _players) {
             [_registry unregisterTexture:[textureId unsignedIntegerValue]];
             [[_players objectForKey:textureId] dispose];
