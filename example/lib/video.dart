@@ -40,4 +40,17 @@ class VideoPageState extends State<VideoPage> {
       ),
     );
   }
+  
+  void _stop() async{
+    if (_controller != null) {
+      await _controller.dispose();
+      _controller = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _stop();
+  }
 }
