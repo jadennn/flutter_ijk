@@ -51,6 +51,20 @@ class VideoPageState extends State<VideoPage> {
       ),
     );
   }
+  
+ ///一定要记得释放资源，否则会造成内存泄漏
+ void _stop() async{
+    if (_controller != null) {
+      await _controller.dispose();
+      _controller = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _stop();
+  }
 }
 ```
 
