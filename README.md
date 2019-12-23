@@ -1,5 +1,7 @@
 # flutter_ijk
 
+## 由于工作重心变动，已经不做应用了，该项目不再维护
+
 A FLUTTER PLAYER SUPPORT RTSP PROTOCOLS
 
   flutter_ijk 是flutter端的ijkplayer播放器，在IOS和Android native端都使用的是bilibili的ijkplayer，由于GitHub大小限制，本项目的ijkplayer源码放在码云，已经定制过编译脚本和部分的功能代码，可以参考以下步骤来获取：
